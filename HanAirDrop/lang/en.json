@@ -1,0 +1,11 @@
+{
+	"AdminDropMessage": "{green} Administrator {red} {0} {green} has summoned air drop support!!",
+	"AirDropMessage": "{green} The air drop supply has been deployed to  {red} {0}",
+	"BlockTeamMessage": "{red} Your team is not allowed to pick up!!",
+	"BlockRoundGlobalMessage": "{green} You can only pick up {red} {0} {green} supply boxes per round, you have exceeded the limit and cannot pick up!!",
+	"BlockRoundBoxMessage": "{green} This air drop box can only be picked up {red} {0} {green} times per round, you have exceeded the limit and cannot pick up!!",
+	"BlockSpawnMessage": "{green} This air drop box can only be picked up {red} 0} {green} times per life, you have exceeded the limit and cannot pick up!!",
+	"PlayerPickUpMessage": "{green} Player: {red} {0} {green} has picked up {red} {1} {green} and received {red} {2}!!",
+	"CtSpawnPointName": "{blue} CT Spawn Point",
+	"TSpawnPointName": "{red} T Spawn Point"
+}

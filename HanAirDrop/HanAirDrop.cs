@@ -19,13 +19,15 @@ public class HanZriotWeapon : BasePlugin
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
+    public string GetTranslatedText(string name, params object[] args) => Localizer[name, args];
+
 
 
     HanAirDropCFG AirDropCFG = HanAirDropCFG.Load();
     HanBoxCFG AirBoxCFG = HanBoxCFG.Load();
     HanItemCFG AirItemCFG = HanItemCFG.Load();
 
-    HanAirDropMessageCFG AirDropMessageCFG = HanAirDropMessageCFG.Load();
+    //HanAirDropMessageCFG AirDropMessageCFG = HanAirDropMessageCFG.Load();
 
 
     private CounterStrikeSharp.API.Modules.Timers.Timer? MapStartDropTimer { get; set; } = null;
@@ -87,13 +89,7 @@ public class HanZriotWeapon : BasePlugin
             return;
 
         CreateDrop();
-        //client.PrintToChat($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}管理员{ChatColors.Red}{client.PlayerName}{ChatColors.LightPurple}召唤了{ChatColors.Red}空投支援{ChatColors.LightPurple}!!");  
-        if (!string.IsNullOrEmpty(AirDropMessageCFG.AdminDropMessage) && AirDropMessageCFG.AdminDropMessage != null)
-        {
-            string message = FormatSimpleMessage(AirDropMessageCFG.AdminDropMessage, client.PlayerName);
-            client.PrintToChat(message);
-        }
-
+        client.PrintToChat(Localizer["AdminDropMessage", client.PlayerName]);
     }
 
 
@@ -129,11 +125,8 @@ public class HanZriotWeapon : BasePlugin
             if (spawn != null)
             {
                 CreateAirDrop(spawn.Value.Position);
-                if (!string.IsNullOrEmpty(AirDropMessageCFG.AdminDropMessage) && AirDropMessageCFG.AdminDropMessage != null)
-                {
-                    string message = FormatSimpleMessage(AirDropMessageCFG.AirDropMessage, spawn.Value.SpawnType);
-                    Server.PrintToChatAll($"{message}");
-                }
+                Server.PrintToChatAll(Localizer["AirDropMessage", spawn.Value.SpawnType]);
+                
 
             }
         }
@@ -300,33 +293,20 @@ public class HanZriotWeapon : BasePlugin
         bool canPick = data.TeamOnly == 0 ? true :data.TeamOnly == 1 ? client.TeamNum == 3 : data.TeamOnly == 2 ? client.TeamNum == 2 : false;
         if (!canPick) 
         {
-            if(!string.IsNullOrEmpty(AirDropMessageCFG.BlockTeamMessage) && AirDropMessageCFG.BlockTeamMessage != null)
-            {
-                client.PrintToChat($"{AirDropMessageCFG.BlockTeamMessage}");
-            }
-            //client.PrintToChat($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}你所在的队伍{ChatColors.Red}无法拾取{ChatColors.LightPurple}!!");
+            client.PrintToChat(Localizer["BlockTeamMessage"]);
             return;
         }
         if(AirDropCFG.PlayerPickEachRound > 0 && PlayerPickUpLimit[client.Slot] == 0)
         {
-            if(!string.IsNullOrEmpty(AirDropMessageCFG.BlockRoundGlobalMessage) && AirDropMessageCFG.BlockRoundGlobalMessage != null)
-            {
-                string message = FormatSimpleMessage(AirDropMessageCFG.BlockRoundGlobalMessage, AirDropCFG.PlayerPickEachRound);
-                client.PrintToChat($"{message}");
-            }
-            //client.PrintToChat($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}每回合只能拾取{ChatColors.Red}{AirDropCFG.PlayerPickEachRound}{ChatColors.LightPurple}个补给箱,你已超出上限 {ChatColors.Red}无法拾取{ChatColors.LightPurple}!!");
+
+            client.PrintToChat(Localizer["BlockRoundGlobalMessage"]);
             return;
         }
         if(data.RoundPickLimit > 0)
         {
             if(!PlayerRoundPickUpLimit.TryGetValue(client.Slot, out var roundLimits) || !roundLimits.TryGetValue(data.Code, out var remaining) || remaining <= 0)
             {
-                //client.PrintToChat($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}此空投箱每回合只能拾取{ChatColors.Red}{data.RoundPickLimit}{ChatColors.LightPurple}个,你已超出上限 {ChatColors.Red}无法拾取{ChatColors.LightPurple}!!");
-                if(!string.IsNullOrEmpty(AirDropMessageCFG.BlockRoundBoxMessage) && AirDropMessageCFG.BlockRoundBoxMessage != null)
-                {
-                    string message = FormatSimpleMessage(AirDropMessageCFG.BlockRoundBoxMessage, data.RoundPickLimit);
-                    Server.PrintToChatAll($"{message}");
-                }
+                client.PrintToChat(Localizer["BlockRoundBoxMessage"]);
                 return;
             }
         }
@@ -334,12 +314,7 @@ public class HanZriotWeapon : BasePlugin
         {
             if(!PlayerSpawnPickUpLimit.TryGetValue(client.Slot, out var spawnLimits) || !spawnLimits.TryGetValue(data.Code, out var remaining) || remaining <= 0)
             {
-                //client.PrintToChat($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}此空投箱每条命只能拾取{ChatColors.Red}{data.SpawnPickLimit}{ChatColors.LightPurple}个,你已超出上限 {ChatColors.Red}无法拾取{ChatColors.LightPurple}!!");
-                if(!string.IsNullOrEmpty(AirDropMessageCFG.BlockRoundSpawnlMessage) && AirDropMessageCFG.BlockRoundSpawnlMessage != null)
-                {
-                    string message = FormatSimpleMessage(AirDropMessageCFG.BlockRoundSpawnlMessage, data.SpawnPickLimit);
-                    Server.PrintToChatAll($"{message}");
-                }
+                client.PrintToChat(Localizer["BlockSpawnMessage"]);
                 return;
             }
         }
@@ -395,13 +370,7 @@ public class HanZriotWeapon : BasePlugin
 
         client.ExecuteClientCommandFromServer(chosenItem.Command); //给予空投命令
 
-        if(!string.IsNullOrEmpty(AirDropMessageCFG.PlayerPickUpMessage) && AirDropMessageCFG.PlayerPickUpMessage != null)
-        {
-            string message = FormatSimpleMessage(AirDropMessageCFG.PlayerPickUpMessage, client.PlayerName, data.Name, chosenItem.Name);
-            Server.PrintToChatAll($"{message}");
-        }
-
-        //Server.PrintToChatAll($"{ChatColors.Gold}[华仔空投]{ChatColors.LightPurple}玩家:{ChatColors.Red}{client.PlayerName}{ChatColors.LightPurple}拾取了{ChatColors.Red}{data.Name}{ChatColors.LightPurple}获得了{ChatColors.Red}{chosenItem.Name}{ChatColors.LightPurple}!!");
+        Server.PrintToChatAll(Localizer["PlayerPickUpMessage", client.PlayerName, data.Name, chosenItem.Name]);
 
         if (!string.IsNullOrEmpty(chosenItem.PickSound))
         {
@@ -502,30 +471,33 @@ public class HanZriotWeapon : BasePlugin
     {
         List<(SpawnPoint spawn, string type)> spawnPoints = new List<(SpawnPoint, string)>();
 
+        string ctspawnposname = Localizer["CtSpawnPointName"];
+        string tspawnposname = Localizer["TSpawnPointName"];
+
         switch (spawnType)
         {
             case 0: // T + CT 混合
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.CtSpawnPointName}")));
+                    .Select(s => (s, $"{ctspawnposname}")));
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.TSpawnPointName}")));
+                    .Select(s => (s, $"{tspawnposname}")));
                 break;
             
             case 1: // 仅 CT
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.CtSpawnPointName}")));
+                    .Select(s => (s, $"{ctspawnposname}")));
                 break;
             
             case 2: // 仅 T
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.TSpawnPointName}")));
+                    .Select(s => (s, $"{tspawnposname}")));
                 break;
             
             default: // 默认混合
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.CtSpawnPointName}")));
+                    .Select(s => (s, $"{ctspawnposname}")));
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
-                    .Select(s => (s, $"{AirDropMessageCFG.TSpawnPointName}")));
+                    .Select(s => (s, $"{tspawnposname}")));
                 break;
         }
 
@@ -544,28 +516,5 @@ public class HanZriotWeapon : BasePlugin
     {
         return Utilities.GetPlayers().Count(player => player != null && player.IsValid && !player.IsBot);
     }
-
-    private string FormatSimpleMessage(string template, params object[] args)
-    {
-        try
-        {
-            // 先检查空模板
-            if (string.IsNullOrEmpty(template)) 
-                return string.Empty;
-                
-            // 检查是否需要格式化（避免无意义的格式化操作）
-            if (!template.Contains("{") || args.Length == 0)
-                return template;
-                
-            return string.Format(template, args);
-        }
-        catch (FormatException ex)
-        {
-            // 记录错误日志
-            Console.WriteLine($"[格式化错误] 模板: {template} 参数: {string.Join(",", args)} 错误: {ex.Message}");
-            return "消息显示错误"; // 返回安全值
-        }
-    }
-
 
 }

@@ -1,0 +1,11 @@
+{
+	"AdminDropMessage": "{green} 管理员 {red} {0} {green} 投放了空投补给!!",
+	"AirDropMessage": "{green} 空投补给投放至了 {red} {0}",
+	"BlockTeamMessage": "{red} 你所在队伍无法拾取!!",
+	"BlockRoundGlobalMessage": "{green} 每回合只能拾取 {red} {0} {green} 个补给箱,你已经超出上限,无法拾取!!",
+	"BlockRoundBoxMessage": "{green} 这个补给箱每回合只允许拾取  {red} {0} {green} 次,你已经超出上限,无法拾取!!",
+	"BlockSpawnMessage": "{green} 这个补给箱每条命 只允许拾取  {red} {0} {green} 次,你已经超出上限,无法拾取!!",
+	"PlayerPickUpMessage": "{green} 玩家:{red} {0} {green} 拾取了 {red}  {1} {green} 获得了 {red} {2}!!",
+	"CtSpawnPointName": "{blue} CT出生点",
+	"TSpawnPointName": "{red} T出生点"
+}
