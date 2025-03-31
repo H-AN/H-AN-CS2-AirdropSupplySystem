@@ -4,20 +4,20 @@ using System.Text.Encodings.Web;
 
 public class HanAirDropMessageCFG
 {
-    public string AdminDropMessage { get; set; } //是否开启 Whether air drop is enabled  
-    public string AirDropMessage { get; set; } //是否开启 Whether air drop is enabled 
+    public string AdminDropMessage { get; set; } 
+    public string AirDropMessage { get; set; } 
 
-    public string BlockTeamMessage { get; set; } //是否开启 Whether air drop is enabled
-    public string BlockRoundGlobalMessage { get; set; } //是否开启 Whether air drop is enabled
+    public string BlockTeamMessage { get; set; } 
+    public string BlockRoundGlobalMessage { get; set; } 
 
-    public string BlockRoundBoxMessage { get; set; } //是否开启 Whether air drop is enabled
+    public string BlockRoundBoxMessage { get; set; } 
 
-    public string BlockRoundSpawnlMessage { get; set; } //是否开启 Whether air drop is enabled
+    public string BlockRoundSpawnlMessage { get; set; } 
 
-    public string PlayerPickUpMessage { get; set; } //是否开启 Whether air drop is enabled
+    public string PlayerPickUpMessage { get; set; } 
 
-    public string CtSpawnPointName { get; set; } //是否开启 Whether air drop is enabled
-    public string TSpawnPointName { get; set; } //是否开启 Whether air drop is enabled
+    public string CtSpawnPointName { get; set; } 
+    public string TSpawnPointName { get; set; } 
     
     public static string ConfigPath = Path.Combine(Application.RootDirectory, "configs", "HanAirDrop", "HanAirDropMessageCFG.json");
 
