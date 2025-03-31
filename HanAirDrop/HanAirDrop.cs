@@ -15,7 +15,7 @@ namespace HanAirDropPlugin;
 public class HanZriotWeapon : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.1.0";
+    public override string ModuleVersion => "1.2.0";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
