@@ -12,7 +12,7 @@ using CounterStrikeSharp.API.Modules.Admin;
 
 namespace HanAirDropPlugin;
 
-public class HanZriotWeapon : BasePlugin
+public class HanAirDropPlugin : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
     public override string ModuleVersion => "1.2.0";
