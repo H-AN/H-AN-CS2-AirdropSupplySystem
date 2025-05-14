@@ -15,7 +15,7 @@ namespace HanAirDropPlugin;
 public class HanAirDropPlugin : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.2.0";
+    public override string ModuleVersion => "1.2.1";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
@@ -56,7 +56,10 @@ public class HanAirDropPlugin : BasePlugin
     public override void Load(bool hotReload)
     {
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
-        RegisterListener<Listeners.OnMapStart>(OnMapStart);
+        //RegisterListener<Listeners.OnMapStart>(OnMapStart);
+
+        RegisterEventHandler<EventRoundStart>(OnRoundStartTimer);
+        
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         HookEntityOutput("trigger_multiple", "OnStartTouch", trigger_multiple, HookMode.Pre);
@@ -93,7 +96,7 @@ public class HanAirDropPlugin : BasePlugin
     }
 
 
-    private void OnMapStart(string mapname)
+    private void OnMapStart(string mapname) //地图开始设置 循环timer 换图导致失效 
     { 
         if (!AirDropCFG.AirDropEnble || AirDropCFG.AirDropMode == 1)
             return;
@@ -103,6 +106,18 @@ public class HanAirDropPlugin : BasePlugin
         
         MapStartDropTimer = AddTimer(AirDropCFG.AirDropTimer, () =>  {CreateDrop();}, TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);  
    
+    }
+
+    private HookResult OnRoundStartTimer(EventRoundStart @event, GameEventInfo info) //改为 回合开始重新计时并循环 修复循环timer失效问题
+    {
+        if (!AirDropCFG.AirDropEnble || AirDropCFG.AirDropMode == 1)
+            return HookResult.Continue;
+    
+        MapStartDropTimer?.Kill();
+        MapStartDropTimer = null;
+        MapStartDropTimer = AddTimer(AirDropCFG.AirDropTimer, () => { CreateDrop(); }, TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
+    
+        return HookResult.Continue;
     }
 
     public void CreateDrop()
