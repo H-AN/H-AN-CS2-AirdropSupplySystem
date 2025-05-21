@@ -21,6 +21,9 @@ public class HanItemCFG
         [JsonPropertyName("enable")] //是否开启  Whether this item is enabled
         public bool Enabled { get; set; }
 
+        [JsonPropertyName("permissions")] //道具权限 
+        public required string Permissions { get; set; } 
+
     }
 
     [JsonPropertyName("ItemList")]
@@ -63,7 +66,8 @@ public class HanItemCFG
                     Command = "css_ak",
                     PickSound = "",
                     ItemProbability = 0.5f,
-                    Enabled = true
+                    Enabled = true,
+                    Permissions = ""
                 },
                 new Item
                 {
@@ -71,7 +75,8 @@ public class HanItemCFG
                     Command = "css_m4",
                     PickSound = "",
                     ItemProbability = 0.3f,
-                    Enabled = true
+                    Enabled = true,
+                    Permissions = ""
                 }
             }
         };

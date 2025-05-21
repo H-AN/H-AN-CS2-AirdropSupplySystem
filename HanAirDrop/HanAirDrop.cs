@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Entities;
 
 
 
@@ -12,10 +13,10 @@ using CounterStrikeSharp.API.Modules.Admin;
 
 namespace HanAirDropPlugin;
 
-public class HanAirDropPlugin : BasePlugin
+public class HanZriotWeapon : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.2.1";
+    public override string ModuleVersion => "1.3.0";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
@@ -51,17 +52,18 @@ public class HanAirDropPlugin : BasePlugin
         public string DropSound { get; set; }
         public int RoundPickLimit { get; set; }
         public int SpawnPickLimit { get; set; }
+        public string Flags { get; set; }
     }
 
     public override void Load(bool hotReload)
     {
         RegisterEventHandler<EventRoundStart>(OnRoundStart);
         //RegisterListener<Listeners.OnMapStart>(OnMapStart);
-
-        RegisterEventHandler<EventRoundStart>(OnRoundStartTimer);
-        
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
+
+        RegisterEventHandler<EventRoundStart>(OnRoundStartTimer);
+
         HookEntityOutput("trigger_multiple", "OnStartTouch", trigger_multiple, HookMode.Pre);
 
         AddCommand($"{AirDropCFG.AdminCommand}", "createbox", createbox);
@@ -96,7 +98,7 @@ public class HanAirDropPlugin : BasePlugin
     }
 
 
-    private void OnMapStart(string mapname) //地图开始设置 循环timer 换图导致失效 
+    private void OnMapStart(string mapname)
     { 
         if (!AirDropCFG.AirDropEnble || AirDropCFG.AirDropMode == 1)
             return;
@@ -108,15 +110,15 @@ public class HanAirDropPlugin : BasePlugin
    
     }
 
-    private HookResult OnRoundStartTimer(EventRoundStart @event, GameEventInfo info) //改为 回合开始重新计时并循环 修复循环timer失效问题
+    private HookResult OnRoundStartTimer(EventRoundStart @event, GameEventInfo info)
     {
         if (!AirDropCFG.AirDropEnble || AirDropCFG.AirDropMode == 1)
             return HookResult.Continue;
-    
+
         MapStartDropTimer?.Kill();
         MapStartDropTimer = null;
         MapStartDropTimer = AddTimer(AirDropCFG.AirDropTimer, () => { CreateDrop(); }, TimerFlags.REPEAT | TimerFlags.STOP_ON_MAPCHANGE);
-    
+
         return HookResult.Continue;
     }
 
@@ -271,7 +273,8 @@ public class HanAirDropPlugin : BasePlugin
             Name = boxConfig.Name,
             DropSound = boxConfig.DropSound,
             RoundPickLimit = boxConfig.RoundPickLimit,
-            SpawnPickLimit = boxConfig.SpawnPickLimit
+            SpawnPickLimit = boxConfig.SpawnPickLimit,
+            Flags = boxConfig.Flags
         };
 
         Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
@@ -333,6 +336,13 @@ public class HanAirDropPlugin : BasePlugin
                 return;
             }
         }
+        if (!HasPermission(client, data.Flags))
+        {
+            string FlagsName = $"{data.Flags}";
+            client.PrintToChat(Localizer["BlockFlagsMessage", FlagsName]);
+            return;
+        }
+
         BoxData.Remove(box); //清理数据
         BoxTriggers.Remove(trigger);
         if (trigger.IsValid)
@@ -375,7 +385,19 @@ public class HanAirDropPlugin : BasePlugin
             return;
         }
 
-        var validItems = AirItemCFG.ItemList.Where(item => item.Enabled && data.Items.Contains(item.Name)).ToList();
+        //var validItems = AirItemCFG.ItemList.Where(item => item.Enabled && data.Items.Contains(item.Name)).ToList();
+        var validItems = AirItemCFG.ItemList
+        .Where(item => item.Enabled && data.Items.Contains(item.Name))
+        .Where(item => HasPermission(client, item.Permissions))
+        .ToList();
+
+        // 玩家没有任何可用权限的道具，给出提示
+        if (validItems.Count == 0)
+        {
+            client.PrintToChat(Localizer["NoPermissionToItems"]); // 提示语言
+            //Console.WriteLine($"[华仔空投] 玩家 {client.PlayerName} 无法拾取箱子 {data.Name} 中的任何道具（权限不足）");
+            return;
+        }
 
         var chosenItem = AirBoxCFG.SelectByProbability(validItems);
         if (chosenItem == null) 
@@ -530,6 +552,17 @@ public class HanAirDropPlugin : BasePlugin
     public static int GetPlayerCount() 
     {
         return Utilities.GetPlayers().Count(player => player != null && player.IsValid && !player.IsBot);
+    }
+
+    private bool HasPermission(CCSPlayerController client, string permissionString)
+    {
+        if (string.IsNullOrWhiteSpace(permissionString))
+            return true; // 无任何权限要求，默认拾取
+
+        var flags = permissionString
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return flags.Any(flag => AdminManager.PlayerHasPermissions(client, flag));
     }
 
 }

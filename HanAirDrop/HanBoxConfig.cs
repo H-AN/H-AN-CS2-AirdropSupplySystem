@@ -35,6 +35,9 @@ public class HanBoxCFG
 
         [JsonPropertyName("code")] //唯一代码 Unique identifier code
         public int Code { get; set; }
+
+        [JsonPropertyName("flags")] //管理员/vip flags
+        public required string Flags { get; set; }
     }
 
     [JsonPropertyName("BoxList")]
@@ -82,7 +85,8 @@ public class HanBoxCFG
                     SpawnPickLimit = 0,
                     Probability = 0.5f,
                     Enabled = true,
-                    Code = 1
+                    Code = 1,
+                    Flags = ""
                 },
                 new Box
                 {
@@ -95,7 +99,8 @@ public class HanBoxCFG
                     SpawnPickLimit = 0,
                     Probability = 0.5f,
                     Enabled = true,
-                    Code = 2
+                    Code = 2,
+                    Flags = ""
                 }
             }
         };
