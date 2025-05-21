@@ -16,8 +16,9 @@ public class HanAirDropCFG
     public int AirDropDynamicCount { get; set; } //动态模式 根据玩家数量 生成 几个 假设填写 1 Dynamic mode: base multiplier (e.g., if 1)  
     public int AirDropPlayerCount { get; set; } //动态模式 每几个玩家 假设 AirDropPlayerCount  填写 2 AirDropDynamicCount 填写 1 则 服务器 玩家 / 2 * 1 = 生成数量 少于2 生成 1 Dynamic mode: divisor (e.g., if AirDropPlayerCount=2 and AirDropDynamicCount=1, spawn count = (player count / 2) * 1; min 1 if <2)  
     public required string PrecacheSoundEvent { get; set; } //预缓存soundevent Precached sound event  
-    public required string AdminCommand { get; set; } //自定义管理员召唤空投的命令 Custom admin command to summon an airdrop 
-    
+    public required string AdminCommand { get; set; } //自定义管理员召唤空投的命令 Custom admin command to summon an airdrop
+    public int Openrandomspawn { get; set; } //打开deathmatch 生成点 用于随机生成
+
     public static string ConfigPath = Path.Combine(Application.RootDirectory, "configs", "HanAirDrop", "HanAirDropCFG.json");
 
     public static HanAirDropCFG Load()
@@ -60,7 +61,8 @@ public class HanAirDropCFG
             AirDropDynamicCount = 1,
             AirDropPlayerCount = 1,
             PrecacheSoundEvent = "",
-            AdminCommand = "css_createbox"
+            AdminCommand = "css_createbox",
+            Openrandomspawn = 0
 
         };
         Save(defaultConfig); // 保存默认配置

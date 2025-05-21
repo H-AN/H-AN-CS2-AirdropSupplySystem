@@ -38,6 +38,13 @@ public class HanBoxCFG
 
         [JsonPropertyName("flags")] //管理员/vip flags
         public required string Flags { get; set; }
+
+        [JsonPropertyName("openglow")] //是否开启透视外发光
+        public bool OpenGlow { get; set;}
+
+        [JsonPropertyName("glowcolor")] //发光颜色设置 ARGB
+        public required string GlowColor { get; set; }
+
     }
 
     [JsonPropertyName("BoxList")]
@@ -86,7 +93,10 @@ public class HanBoxCFG
                     Probability = 0.5f,
                     Enabled = true,
                     Code = 1,
-                    Flags = ""
+                    Flags = "",
+                    OpenGlow = true,
+                    GlowColor = "255,255,0,0"
+
                 },
                 new Box
                 {
@@ -100,7 +110,9 @@ public class HanBoxCFG
                     Probability = 0.5f,
                     Enabled = true,
                     Code = 2,
-                    Flags = ""
+                    Flags = "",
+                    OpenGlow = true,
+                    GlowColor = "255,255,0,0"
                 }
             }
         };

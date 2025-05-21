@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Entities;
+using System.Drawing;
 
 
 
@@ -16,7 +17,7 @@ namespace HanAirDropPlugin;
 public class HanAirDropPlugin : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.3.0";
+    public override string ModuleVersion => "1.4.0";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
@@ -53,6 +54,8 @@ public class HanAirDropPlugin : BasePlugin
         public int RoundPickLimit { get; set; }
         public int SpawnPickLimit { get; set; }
         public string Flags { get; set; }
+
+        public bool OpenGlow { get; set; }
     }
 
     public override void Load(bool hotReload)
@@ -114,6 +117,17 @@ public class HanAirDropPlugin : BasePlugin
     {
         if (!AirDropCFG.AirDropEnble || AirDropCFG.AirDropMode == 1)
             return HookResult.Continue;
+
+        int code = 0;
+        if (AirDropCFG.Openrandomspawn == 0)
+        {
+            code = 0;
+        }
+        else
+        {
+            code = 1;
+        }
+        Server.ExecuteCommand($"mp_randomspawn {code}");
 
         MapStartDropTimer?.Kill();
         MapStartDropTimer = null;
@@ -274,7 +288,8 @@ public class HanAirDropPlugin : BasePlugin
             DropSound = boxConfig.DropSound,
             RoundPickLimit = boxConfig.RoundPickLimit,
             SpawnPickLimit = boxConfig.SpawnPickLimit,
-            Flags = boxConfig.Flags
+            Flags = boxConfig.Flags,
+            OpenGlow = boxConfig.OpenGlow
         };
 
         Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
@@ -293,6 +308,14 @@ public class HanAirDropPlugin : BasePlugin
             worldEntity.EmitSound($"{boxConfig.DropSound}");
         }
         AddTimer(AirDropCFG.AirDropKillTimer, () =>  {BoxSelfKill(trigger, Box);},TimerFlags.STOP_ON_MAPCHANGE);
+
+        if (BoxData[Box].OpenGlow)
+        {
+            // 定义默认颜色
+            Color defaultGlowColor = Color.FromArgb(255, 255, 0, 0);
+            HanAirDropGlow.TryParseColor(boxConfig.GlowColor, out var glowColor, defaultGlowColor);
+            HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+        }
         //Server.PrintToChatAll($"空投 {AirDropCFG.AirDropName} , 实体名 {Box.Entity!.Name} 已创建");
     }
 
@@ -510,14 +533,20 @@ public class HanAirDropPlugin : BasePlugin
 
         string ctspawnposname = Localizer["CtSpawnPointName"];
         string tspawnposname = Localizer["TSpawnPointName"];
+        string dspawnposname = Localizer["DSpawnPointName"];
 
         switch (spawnType)
         {
-            case 0: // T + CT 混合
+            case 0: // T + CT + 死亡竞赛复活点 混合
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
                     .Select(s => (s, $"{ctspawnposname}")));
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
                     .Select(s => (s, $"{tspawnposname}")));
+                if (AirDropCFG.Openrandomspawn != 0)
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_deathmatch_spawn")
+                    .Select(s => (s, $"{dspawnposname}")));
+                }
                 break;
             
             case 1: // 仅 CT
@@ -529,12 +558,55 @@ public class HanAirDropPlugin : BasePlugin
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
                     .Select(s => (s, $"{tspawnposname}")));
                 break;
-            
-            default: // 默认混合
+            case 3: // 仅 死亡竞赛复活点
+                if (AirDropCFG.Openrandomspawn != 0)
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_deathmatch_spawn")
+                    .Select(s => (s, $"{dspawnposname}")));
+                }
+                else
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
+                                        .Select(s => (s, $"{ctspawnposname}")));
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
+                        .Select(s => (s, $"{tspawnposname}")));
+                }
+                break;
+            case 4: // 仅 CT + T
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
                     .Select(s => (s, $"{ctspawnposname}")));
                 spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
                     .Select(s => (s, $"{tspawnposname}")));
+                break;
+            case 5: // 仅 CT + 死亡竞赛复活点
+                spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
+                    .Select(s => (s, $"{ctspawnposname}")));
+                if (AirDropCFG.Openrandomspawn != 0)
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_deathmatch_spawn")
+                    .Select(s => (s, $"{dspawnposname}")));
+                }
+                break;
+            case 6: // 仅 T + 死亡竞赛复活点
+                spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
+                    .Select(s => (s, $"{ctspawnposname}")));
+                if (AirDropCFG.Openrandomspawn != 0)
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_deathmatch_spawn")
+                    .Select(s => (s, $"{dspawnposname}")));
+                }
+                break;
+
+            default: // 全部默认混合
+                spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_counterterrorist")
+                    .Select(s => (s, $"{ctspawnposname}")));
+                spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_player_terrorist")
+                    .Select(s => (s, $"{tspawnposname}")));
+                if (AirDropCFG.Openrandomspawn != 0)
+                {
+                    spawnPoints.AddRange(Utilities.FindAllEntitiesByDesignerName<SpawnPoint>("info_deathmatch_spawn")
+                    .Select(s => (s, $"{dspawnposname}")));
+                }
                 break;
         }
 
