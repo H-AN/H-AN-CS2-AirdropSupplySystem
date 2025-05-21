@@ -7,5 +7,8 @@
 	"BlockSpawnMessage": "{green} This air drop box can only be picked up {red} 0} {green} times per life, you have exceeded the limit and cannot pick up!!",
 	"PlayerPickUpMessage": "{green} Player: {red} {0} {green} has picked up {red} {1} {green} and received {red} {2}!!",
 	"CtSpawnPointName": "{blue} CT Spawn Point",
-	"TSpawnPointName": "{red} T Spawn Point"
+	"TSpawnPointName": "{red} T Spawn Point",
+	"BlockFlagsMessage": "{green}You do not have permission to pick up this airdrop box, {red}required permission: {0}",
+	"NoPermissionToItems": "{green}This box contains items that {red}require permission{green}, you are not eligible to receive them"
+
 }
