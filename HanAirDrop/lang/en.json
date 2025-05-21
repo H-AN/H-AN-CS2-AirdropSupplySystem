@@ -8,6 +8,7 @@
 	"PlayerPickUpMessage": "{green} Player: {red} {0} {green} has picked up {red} {1} {green} and received {red} {2}!!",
 	"CtSpawnPointName": "{blue} CT Spawn Point",
 	"TSpawnPointName": "{red} T Spawn Point",
+	"DSpawnPointName": "{red} Map Random Point",
 	"BlockFlagsMessage": "{green}You do not have permission to pick up this airdrop box, {red}required permission: {0}",
 	"NoPermissionToItems": "{green}This box contains items that {red}require permission{green}, you are not eligible to receive them"
 

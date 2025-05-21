@@ -8,6 +8,7 @@
 	"PlayerPickUpMessage": "{green} 玩家:{red} {0} {green} 拾取了 {red}  {1} {green} 获得了 {red} {2}!!",
 	"CtSpawnPointName": "{blue} CT出生点",
 	"TSpawnPointName": "{red} T出生点",
+	"DSpawnPointName": "{red} 地图随机位置",
 	"BlockFlagsMessage": "{green} 你没有权限拾取本空投箱,{red}需要权限 {0}",
 	"NoPermissionToItems": "{green} 此道具箱内道具,{red}需要权限{green},你无法获得"
 }
