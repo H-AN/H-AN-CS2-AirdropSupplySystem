@@ -10,5 +10,13 @@
 	"TSpawnPointName": "{red} T出生点",
 	"DSpawnPointName": "{red} 地图随机位置",
 	"BlockFlagsMessage": "{green} 你没有权限拾取本空投箱,{red}需要权限 {0}",
-	"NoPermissionToItems": "{green} 此道具箱内道具,{red}需要权限{green},你无法获得"
+	"NoPermissionToItems": "{green} 此道具箱内道具,{red}需要权限{green},你无法获得",
+	"AdminCreateRandomBox": "{green} 你没有权限召唤地图随机空投,{red}需要权限 {0} .",
+	"AdminSelectBoxFlags": "{green} 你没有权限召唤定向空投,{red}需要权限 {0} .",
+	"AdminSelectBoxError": "{green} 使用方法错误, {red} 用法: !命令 空投名 数量 {green}.",
+	"AdminSelectBoxError2": "{green} 使用方法错误, {red} 请输入正确的数量 最少为 1 个{green}.",
+	"AdminSelectBoxError3": "{green} 找不到名为 {red} {0} 的空投箱 {green},请在配置中填写可以生成的空投箱.",
+	"AdminSelectBoxCreated": "{green} 管理员 {red} {0} {green} 定向投放了 {red} {2} {green} 个 {red} {1} {green} 空投箱!!",
+	"AdminSelectBoxCount":"{green} 输入数量超过设置数量,一次生成空投最大数量为 {red} {0} {green} 个!!",
+	"AdminSelectBoxColdCown":"{green} 请勿频繁使用该命令,冷却时间为 {red} {0} {green} 秒!!"
 }

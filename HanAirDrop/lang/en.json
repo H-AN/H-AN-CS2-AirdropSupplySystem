@@ -10,6 +10,14 @@
 	"TSpawnPointName": "{red} T Spawn Point",
 	"DSpawnPointName": "{red} Map Random Point",
 	"BlockFlagsMessage": "{green}You do not have permission to pick up this airdrop box, {red}required permission: {0}",
-	"NoPermissionToItems": "{green}This box contains items that {red}require permission{green}, you are not eligible to receive them"
+	"NoPermissionToItems": "{green}This box contains items that {red}require permission{green}, you are not eligible to receive them",
+	"AdminCreateRandomBox": "{green} You don't have permission to summon a random map airdrop, {red}permission required: {0}.",
+	"AdminSelectBoxFlags": "{green} You don't have permission to summon a specific airdrop, {red}permission required: {0}.",
+	"AdminSelectBoxError": "{green} Incorrect usage, {red} Usage: !Command AirdropName Amount {green}.",
+	"AdminSelectBoxError2": "{green} Incorrect usage, {red} Please enter a valid amount (minimum 1) {green}.",
+	"AdminSelectBoxError3": "{green} Could not find an airdrop named {red} {0} {green}, please make sure it is defined in the configuration.",
+	"AdminSelectBoxCreated": "{green} Admin {red} {0} {green} has summoned {red} {2} {1} {green} airdrop(s)!!",
+	"AdminSelectBoxCount": "{green} The amount you entered exceeds the limit. The maximum number of airdrops per use is {red} {0} {green}!",
+    "AdminSelectBoxColdCown": "{green} Please don’t use this command too frequently. The cooldown time is {red} {0} {green} seconds!"
 
 }
