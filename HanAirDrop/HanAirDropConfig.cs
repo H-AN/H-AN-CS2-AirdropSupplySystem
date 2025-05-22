@@ -18,6 +18,12 @@ public class HanAirDropCFG
     public required string PrecacheSoundEvent { get; set; } //预缓存soundevent Precached sound event  
     public required string AdminCommand { get; set; } //自定义管理员召唤空投的命令 Custom admin command to summon an airdrop
     public int Openrandomspawn { get; set; } //打开deathmatch 生成点 用于随机生成
+    public required string AdminCommandFlags { get; set; } //管理员召唤随机空投所需要的Flags
+    public required string AdminSelectBoxCommand { get; set; } //召唤自选空投箱命令
+    public required string AdminSelectBoxCommandFlags { get; set; } //召唤自选空投箱的权限
+    public int AdminSelectBoxCount { get; set; } //限制恶意生成数量过多炸服
+
+    public float AdminSelectBoxColdCown { get; set; }
 
     public static string ConfigPath = Path.Combine(Application.RootDirectory, "configs", "HanAirDrop", "HanAirDropCFG.json");
 
@@ -62,7 +68,12 @@ public class HanAirDropCFG
             AirDropPlayerCount = 1,
             PrecacheSoundEvent = "",
             AdminCommand = "css_createbox",
-            Openrandomspawn = 0
+            Openrandomspawn = 0,
+            AdminCommandFlags = "",
+            AdminSelectBoxCommand = "css_selectbox",
+            AdminSelectBoxCommandFlags = "",
+            AdminSelectBoxCount = 10,
+            AdminSelectBoxColdCown = 1.0f
 
         };
         Save(defaultConfig); // 保存默认配置

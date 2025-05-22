@@ -7,6 +7,9 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Entities;
 using System.Drawing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using static HanBoxCFG;
+
 
 
 
@@ -17,11 +20,13 @@ namespace HanAirDropPlugin;
 public class HanAirDropPlugin : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.4.0";
+    public override string ModuleVersion => "1.5.0";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
     public string GetTranslatedText(string name, params object[] args) => Localizer[name, args];
+
+    private readonly Dictionary<ulong, DateTime> AdminCreateBoxCooldown = new();
 
 
 
@@ -70,6 +75,7 @@ public class HanAirDropPlugin : BasePlugin
         HookEntityOutput("trigger_multiple", "OnStartTouch", trigger_multiple, HookMode.Pre);
 
         AddCommand($"{AirDropCFG.AdminCommand}", "createbox", createbox);
+        AddCommand($"{AirDropCFG.AdminSelectBoxCommand}", "createbox2", createbox2);
 
         RegisterListener<Listeners.OnServerPrecacheResources>((manifest) => 
         {
@@ -96,8 +102,160 @@ public class HanAirDropPlugin : BasePlugin
         if(client == null || !client.IsValid) 
             return;
 
+        if (!HasPermission(client, AirDropCFG.AdminCommandFlags))
+        {
+            string FlagsName = $"{AirDropCFG.AdminCommandFlags}";
+            client.PrintToChat(Localizer["AdminCreateRandomBox", FlagsName]); //需要的权限提示
+            return;
+        }
+
         CreateDrop();
         client.PrintToChat(Localizer["AdminDropMessage", client.PlayerName]);
+    }
+
+    [RequiresPermissions(@"css/slay")]
+    public void createbox2(CCSPlayerController? client, CommandInfo info)
+    {
+        if (client == null || !client.IsValid || !client.PawnIsAlive)
+            return;
+
+        var steamId = client.SteamID;
+
+        if (!HasPermission(client, AirDropCFG.AdminSelectBoxCommandFlags))
+        {
+            string FlagsName = $"{AirDropCFG.AdminSelectBoxCommandFlags}";
+            client.PrintToChat(Localizer["AdminSelectBoxFlags", FlagsName]); //需要的权限提示
+            return;
+        }
+
+        // 冷却限制
+        if (AdminCreateBoxCooldown.TryGetValue(steamId, out var lastTime))
+        {
+            double secondsSince = (DateTime.Now - lastTime).TotalSeconds;
+            if (secondsSince < AirDropCFG.AdminSelectBoxColdCown)
+            {
+                client.PrintToChat(Localizer["AdminSelectBoxColdCown", AirDropCFG.AdminSelectBoxColdCown]);
+                return;
+            }
+        }
+
+        AdminCreateBoxCooldown[steamId] = DateTime.Now;
+
+        if (info.ArgCount < 3)
+        {
+            client.PrintToChat(Localizer["AdminSelectBoxError"]); //用法: !createbox 空投名 次数
+            return;
+        }
+
+        string boxName = info.ArgByIndex(1);
+        if (!int.TryParse(info.ArgByIndex(2), out int count) || count <= 0)
+        {
+            client.PrintToChat(Localizer["AdminSelectBoxError2"]); //请输入有效的次数（正整数）
+            return;
+        }
+
+        if (count > AirDropCFG.AdminSelectBoxCount)
+        {
+            client.PrintToChat(Localizer["AdminSelectBoxCount", AirDropCFG.AdminSelectBoxCount]); //请输入有效的次数（正整数）
+            return;
+        }
+
+        // 查找配置中是否存在该空投名
+        var boxConfig = AirBoxCFG.BoxList.FirstOrDefault(b => b.Enabled && b.Name == boxName);
+        if (boxConfig == null)
+        {
+            client.PrintToChat(Localizer["AdminSelectBoxError3", boxName]); //$"找不到名为 [{boxName}] 的空投配置，或该配置未启用。
+            return;
+        }
+
+        // 获取管理员位置
+        //Vector startPosition = client.Pawn.Value.AbsOrigin;
+        Vector spawnPos = GetForwardPosition(client, 120f);
+
+        for (int i = 0; i < count; i++)
+        {
+            //每个空投间隔 80单位
+            Vector dropPos = new Vector(spawnPos.X + (i * 50), spawnPos.Y, spawnPos.Z);
+            CreateAirDropAtPosition(boxConfig, dropPos);
+        }
+        string BoxNameMessage = $"{boxName}";
+        string BoxCountMessage = $"{count}";
+        Server.PrintToChatAll(Localizer["AdminSelectBoxCreated", client.PlayerName, BoxNameMessage, BoxCountMessage]); ////已创建 {count} 个空投 [{boxName}]。
+    }
+
+    public static Vector GetForwardPosition(CCSPlayerController player, float distance = 100f)
+    {
+        if (player == null || player.Pawn == null || player.PlayerPawn == null)
+            return new Vector(0, 0, 0); // fallback
+
+        // 克隆原始位置和朝向，避免引用原始结构造成副作用
+        Vector origin = new Vector(
+            player.Pawn.Value.AbsOrigin.X,
+            player.Pawn.Value.AbsOrigin.Y,
+            player.Pawn.Value.AbsOrigin.Z
+        );
+
+        QAngle angle = new QAngle(
+            player.PlayerPawn.Value.EyeAngles.X,
+            player.PlayerPawn.Value.EyeAngles.Y,
+            player.PlayerPawn.Value.EyeAngles.Z
+        );
+
+        // 根据 Yaw（水平旋转角）计算前方向量
+        float yaw = angle.Y * MathF.PI / 180f;
+        Vector forward = new Vector(MathF.Cos(yaw), MathF.Sin(yaw), 0);
+
+        // 计算前方目标点（适当提高 Z 高度避免地面卡住）
+        Vector target = origin + forward * distance;
+        target.Z += 10f;
+
+        return target;
+    }
+
+    public void CreateAirDropAtPosition(Box config, Vector position)
+    {
+        var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override");
+        if (Box == null) return;
+
+        Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
+        Box.SetModel(config.ModelPath);
+        Box.DispatchSpawn();
+        Box.Entity!.Name = "华仔空投";
+
+        BoxData[Box] = new AirBoxData
+        {
+            Code = config.Code,
+            Items = config.Items.Split(','),
+            TeamOnly = config.TeamOnly,
+            Name = config.Name,
+            DropSound = config.DropSound,
+            RoundPickLimit = config.RoundPickLimit,
+            SpawnPickLimit = config.SpawnPickLimit,
+            Flags = config.Flags,
+            OpenGlow = config.OpenGlow
+        };
+
+        Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+        Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
+        Box.Teleport(position);
+
+        var trigger = CreateTrigger(Box);
+        BoxTriggers.Add(trigger, Box);
+
+        if (!string.IsNullOrEmpty(config.DropSound))
+        {
+            var world = Utilities.GetEntityFromIndex<CBaseEntity>(0);
+            world?.EmitSound(config.DropSound);
+        }
+
+        AddTimer(AirDropCFG.AirDropKillTimer, () => BoxSelfKill(trigger, Box), TimerFlags.STOP_ON_MAPCHANGE);
+
+        if (BoxData[Box].OpenGlow)
+        {
+            Color defaultColor = Color.FromArgb(255, 255, 0, 0);
+            HanAirDropGlow.TryParseColor(config.GlowColor, out var glowColor, defaultColor);
+            HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+        }
     }
 
 
