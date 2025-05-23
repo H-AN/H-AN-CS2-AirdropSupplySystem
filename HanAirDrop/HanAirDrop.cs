@@ -20,13 +20,15 @@ namespace HanAirDropPlugin;
 public class HanAirDropPlugin : BasePlugin
 {
     public override string ModuleName => "[华仔]CS2空投补给系统 Airdrop Supply System";
-    public override string ModuleVersion => "1.5.0";
+    public override string ModuleVersion => "1.5.1";
     public override string ModuleAuthor => "By : 华仔H-AN";
     public override string ModuleDescription => "空投补给, QQ群107866133, github https://github.com/H-AN";
 
     public string GetTranslatedText(string name, params object[] args) => Localizer[name, args];
 
     private readonly Dictionary<ulong, DateTime> AdminCreateBoxCooldown = new();
+
+    public string physicsBox = "models/de_overpass/junk/cardboard_box/cardboard_box_4.vmdl_c";
 
 
 
@@ -59,8 +61,9 @@ public class HanAirDropPlugin : BasePlugin
         public int RoundPickLimit { get; set; }
         public int SpawnPickLimit { get; set; }
         public string Flags { get; set; }
-
         public bool OpenGlow { get; set; }
+
+        //public bool Modelphysics { get; set; }
     }
 
     public override void Load(bool hotReload)
@@ -91,7 +94,7 @@ public class HanAirDropPlugin : BasePlugin
                     manifest.AddResource(sound);
                 }
             }
-            
+            manifest.AddResource(physicsBox);    //预缓存通用物理模型
         });
         
     }
@@ -214,47 +217,99 @@ public class HanAirDropPlugin : BasePlugin
 
     public void CreateAirDropAtPosition(Box config, Vector position)
     {
-        var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override");
-        if (Box == null) return;
-
-        Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
-        Box.SetModel(config.ModelPath);
-        Box.DispatchSpawn();
-        Box.Entity!.Name = "华仔空投";
-
-        BoxData[Box] = new AirBoxData
+        if(config.ModelPhysics)
         {
-            Code = config.Code,
-            Items = config.Items.Split(','),
-            TeamOnly = config.TeamOnly,
-            Name = config.Name,
-            DropSound = config.DropSound,
-            RoundPickLimit = config.RoundPickLimit,
-            SpawnPickLimit = config.SpawnPickLimit,
-            Flags = config.Flags,
-            OpenGlow = config.OpenGlow
-        };
+            var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override");
+            if (Box == null) return;
 
-        Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
-        Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
-        Box.Teleport(position);
+            Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
+            Box.SetModel(config.ModelPath);
+            Box.DispatchSpawn();
 
-        var trigger = CreateTrigger(Box);
-        BoxTriggers.Add(trigger, Box);
+            string propName = "华仔空投_" + new Random().Next(1000000, 9999999).ToString();
+            Box.Entity!.Name = propName;
 
-        if (!string.IsNullOrEmpty(config.DropSound))
-        {
-            var world = Utilities.GetEntityFromIndex<CBaseEntity>(0);
-            world?.EmitSound(config.DropSound);
+            BoxData[Box] = new AirBoxData
+            {
+                Code = config.Code,
+                Items = config.Items.Split(','),
+                TeamOnly = config.TeamOnly,
+                Name = config.Name,
+                DropSound = config.DropSound,
+                RoundPickLimit = config.RoundPickLimit,
+                SpawnPickLimit = config.SpawnPickLimit,
+                Flags = config.Flags,
+                OpenGlow = config.OpenGlow,
+                //Modelphysics = config.ModelPhysics
+            };
+
+            Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
+            Box.Teleport(position);
+
+            var trigger = CreateTrigger(Box);
+            BoxTriggers.Add(trigger, Box);
+
+            if (!string.IsNullOrEmpty(config.DropSound))
+            {
+                var world = Utilities.GetEntityFromIndex<CBaseEntity>(0);
+                world?.EmitSound(config.DropSound);
+            }
+
+            AddTimer(AirDropCFG.AirDropKillTimer, () => BoxSelfKill(trigger, Box), TimerFlags.STOP_ON_MAPCHANGE);
+
+            if (BoxData[Box].OpenGlow)
+            {
+                Color defaultColor = Color.FromArgb(255, 255, 0, 0);
+                HanAirDropGlow.TryParseColor(config.GlowColor, out var glowColor, defaultColor);
+                HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+            }
         }
-
-        AddTimer(AirDropCFG.AirDropKillTimer, () => BoxSelfKill(trigger, Box), TimerFlags.STOP_ON_MAPCHANGE);
-
-        if (BoxData[Box].OpenGlow)
+        else
         {
-            Color defaultColor = Color.FromArgb(255, 255, 0, 0);
-            HanAirDropGlow.TryParseColor(config.GlowColor, out var glowColor, defaultColor);
-            HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+            var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override");
+            if (Box == null) return;
+
+            Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
+            Box.SetModel(physicsBox); //config.ModelPath
+            Box.DispatchSpawn();
+
+            string propName = "华仔空投_" + new Random().Next(1000000, 9999999).ToString();
+            Box.Entity!.Name = propName;
+
+            BoxData[Box] = new AirBoxData
+            {
+                Code = config.Code,
+                Items = config.Items.Split(','),
+                TeamOnly = config.TeamOnly,
+                Name = config.Name,
+                DropSound = config.DropSound,
+                RoundPickLimit = config.RoundPickLimit,
+                SpawnPickLimit = config.SpawnPickLimit,
+                Flags = config.Flags,
+                OpenGlow = config.OpenGlow,
+                //Modelphysics = config.ModelPhysics
+            };
+
+            Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
+            Box.Teleport(position);
+
+            var trigger = CreateTrigger(Box);
+            BoxTriggers.Add(trigger, Box);
+
+            if (!string.IsNullOrEmpty(config.DropSound))
+            {
+                var world = Utilities.GetEntityFromIndex<CBaseEntity>(0);
+                world?.EmitSound(config.DropSound);
+            }
+
+            AddTimer(AirDropCFG.AirDropKillTimer, () => BoxSelfKill(trigger, Box), TimerFlags.STOP_ON_MAPCHANGE);
+
+
+            string newColor = BoxData[Box].OpenGlow ? config.GlowColor : "0,0,0,0";
+            var cloneprop = CreateClone(Box, config.ModelPath, propName, newColor);
+
         }
     }
 
@@ -427,54 +482,108 @@ public class HanAirDropPlugin : BasePlugin
             return;
         }
 
-        var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override")!;
-        if (Box == null)
-            return;
-        
-        Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
-        Box.SetModel($"{boxConfig.ModelPath}");
-        Box.DispatchSpawn();
-
-        Box.Entity!.Name = $"华仔空投";
-        // 存储到字典
-        BoxData[Box] = new AirBoxData 
+        if (boxConfig.ModelPhysics)
         {
-            Code = boxConfig.Code,
-            Items = boxConfig.Items.Split(','),
-            TeamOnly = boxConfig.TeamOnly,
-            Name = boxConfig.Name,
-            DropSound = boxConfig.DropSound,
-            RoundPickLimit = boxConfig.RoundPickLimit,
-            SpawnPickLimit = boxConfig.SpawnPickLimit,
-            Flags = boxConfig.Flags,
-            OpenGlow = boxConfig.OpenGlow
-        };
-
-        Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
-        Box.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
-        Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
-        Utilities.SetStateChanged(Box, "VPhysicsCollisionAttribute_t", "m_nCollisionGroup");
-        Vector SafePosition = new Vector(Position.X, Position.Y, Position.Z);
-        Box.Teleport(SafePosition);//, Rotation, new Vector(0, 0, 0)
-        var trigger = CreateTrigger(Box);
-        BoxTriggers.Add(trigger, Box); // 关键：建立触发器与实体的关联
-        if (!string.IsNullOrEmpty(boxConfig.DropSound))
-        {
-            var worldEntity = Utilities.GetEntityFromIndex<CBaseEntity>(0);
-            if (worldEntity is null || worldEntity.IsValid is not true|| worldEntity.DesignerName.Contains("world") is not true) 
+            var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override")!;
+            if (Box == null)
                 return;
-            worldEntity.EmitSound($"{boxConfig.DropSound}");
-        }
-        AddTimer(AirDropCFG.AirDropKillTimer, () =>  {BoxSelfKill(trigger, Box);},TimerFlags.STOP_ON_MAPCHANGE);
+        
+            Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
+            Box.SetModel($"{boxConfig.ModelPath}");
+            Box.DispatchSpawn();
 
-        if (BoxData[Box].OpenGlow)
-        {
-            // 定义默认颜色
-            Color defaultGlowColor = Color.FromArgb(255, 255, 0, 0);
-            HanAirDropGlow.TryParseColor(boxConfig.GlowColor, out var glowColor, defaultGlowColor);
-            HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+            string propName = "华仔空投_" + new Random().Next(1000000, 9999999).ToString();
+            Box.Entity!.Name = propName;
+            // 存储到字典
+            BoxData[Box] = new AirBoxData 
+            {
+                Code = boxConfig.Code,
+                Items = boxConfig.Items.Split(','),
+                TeamOnly = boxConfig.TeamOnly,
+                Name = boxConfig.Name,
+                DropSound = boxConfig.DropSound,
+                RoundPickLimit = boxConfig.RoundPickLimit,
+                SpawnPickLimit = boxConfig.SpawnPickLimit,
+                Flags = boxConfig.Flags,
+                OpenGlow = boxConfig.OpenGlow
+            };
+
+            Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Box.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
+            Utilities.SetStateChanged(Box, "VPhysicsCollisionAttribute_t", "m_nCollisionGroup");
+            Vector SafePosition = new Vector(Position.X, Position.Y, Position.Z);
+            Box.Teleport(SafePosition);//, Rotation, new Vector(0, 0, 0)
+            var trigger = CreateTrigger(Box);
+            BoxTriggers.Add(trigger, Box); // 关键：建立触发器与实体的关联
+            if (!string.IsNullOrEmpty(boxConfig.DropSound))
+            {
+                var worldEntity = Utilities.GetEntityFromIndex<CBaseEntity>(0);
+                if (worldEntity is null || worldEntity.IsValid is not true|| worldEntity.DesignerName.Contains("world") is not true) 
+                    return;
+                worldEntity.EmitSound($"{boxConfig.DropSound}");
+            }
+            AddTimer(AirDropCFG.AirDropKillTimer, () =>  {BoxSelfKill(trigger, Box);},TimerFlags.STOP_ON_MAPCHANGE);
+
+            if (BoxData[Box].OpenGlow)
+            {
+                // 定义默认颜色
+                Color defaultGlowColor = Color.FromArgb(255, 255, 0, 0);
+                HanAirDropGlow.TryParseColor(boxConfig.GlowColor, out var glowColor, defaultGlowColor);
+                HanAirDropGlow.SetGlow(Box, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+            }
+                //Server.PrintToChatAll($"空投 {AirDropCFG.AirDropName} , 实体名 {Box.Entity!.Name} 已创建");
+
         }
-        //Server.PrintToChatAll($"空投 {AirDropCFG.AirDropName} , 实体名 {Box.Entity!.Name} 已创建");
+        else
+        {
+
+            var Box = Utilities.CreateEntityByName<CPhysicsPropOverride>("prop_physics_override")!;
+            if (Box == null)
+                return;
+
+            Box.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
+            Box.SetModel(physicsBox); //config.ModelPath
+            //Box.SetModel($"{boxConfig.ModelPath}");
+            Box.DispatchSpawn();
+
+            string propName = "华仔空投_" + new Random().Next(1000000, 9999999).ToString();
+            Box.Entity!.Name = propName;
+            // 存储到字典
+            BoxData[Box] = new AirBoxData
+            {
+                Code = boxConfig.Code,
+                Items = boxConfig.Items.Split(','),
+                TeamOnly = boxConfig.TeamOnly,
+                Name = boxConfig.Name,
+                DropSound = boxConfig.DropSound,
+                RoundPickLimit = boxConfig.RoundPickLimit,
+                SpawnPickLimit = boxConfig.SpawnPickLimit,
+                Flags = boxConfig.Flags,
+                OpenGlow = boxConfig.OpenGlow
+            };
+
+            Box.Collision.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Box.Collision.CollisionAttribute.CollisionGroup = (byte)CollisionGroup.COLLISION_GROUP_DISSOLVING;
+            Utilities.SetStateChanged(Box, "CCollisionProperty", "m_CollisionGroup");
+            Utilities.SetStateChanged(Box, "VPhysicsCollisionAttribute_t", "m_nCollisionGroup");
+            Vector SafePosition = new Vector(Position.X, Position.Y, Position.Z);
+            Box.Teleport(SafePosition);//, Rotation, new Vector(0, 0, 0)
+            var trigger = CreateTrigger(Box);
+            BoxTriggers.Add(trigger, Box); // 关键：建立触发器与实体的关联
+            if (!string.IsNullOrEmpty(boxConfig.DropSound))
+            {
+                var worldEntity = Utilities.GetEntityFromIndex<CBaseEntity>(0);
+                if (worldEntity is null || worldEntity.IsValid is not true || worldEntity.DesignerName.Contains("world") is not true)
+                    return;
+                worldEntity.EmitSound($"{boxConfig.DropSound}");
+            }
+            AddTimer(AirDropCFG.AirDropKillTimer, () => { BoxSelfKill(trigger, Box); }, TimerFlags.STOP_ON_MAPCHANGE);
+
+            string newColor = BoxData[Box].OpenGlow ? boxConfig.GlowColor : "0,0,0,0";
+            var cloneprop = CreateClone(Box, boxConfig.ModelPath, propName, newColor);
+
+        }
     }
 
 
@@ -793,6 +902,54 @@ public class HanAirDropPlugin : BasePlugin
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
         return flags.Any(flag => AdminManager.PlayerHasPermissions(client, flag));
+    }
+
+    public CDynamicProp? CreateClone(CPhysicsPropOverride prop, string model, string propName, string glowcolor) // , string glowcolor
+    {
+        if (string.IsNullOrEmpty(model))
+        {
+            return null;
+        }
+
+        CDynamicProp? clone = Utilities.CreateEntityByName<CDynamicProp>("prop_dynamic");
+        if (clone == null || clone.Entity == null || clone.Entity.Handle == IntPtr.Zero || !clone.IsValid)
+        {
+            return null;
+        }
+
+        clone.Entity.Name = propName + "_clone";
+        clone.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= unchecked((uint)~(1 << 2));
+
+        clone.SetModel(model);
+        
+        clone.DispatchSpawn();
+        clone.Teleport(prop.AbsOrigin, prop.AbsRotation, null);
+        clone.UseAnimGraph = false;
+
+        clone.AcceptInput("FollowEntity", prop, prop, propName); //
+
+
+        clone.Render = Color.FromArgb(255, 255, 255, 255);
+        Utilities.SetStateChanged(clone, "CBaseModelEntity", "m_clrRender");
+
+        Color defaultGlowColor = Color.FromArgb(255, 255, 0, 0);
+        HanAirDropGlow.TryParseColor(glowcolor, out var glowColor, defaultGlowColor);
+        HanAirDropGlow.SetGlow(clone, glowColor.A, glowColor.R, glowColor.G, glowColor.B);
+
+        SetPropInvisible(prop);
+
+        return clone;
+    }
+
+    public void SetPropInvisible(CPhysicsPropOverride entity)
+    {
+        if (entity == null || !entity.IsValid)
+        {
+            return;
+        }
+
+        entity.Render = Color.FromArgb(0, 255, 255, 255);
+        Utilities.SetStateChanged(entity, "CBaseModelEntity", "m_clrRender");
     }
 
 }

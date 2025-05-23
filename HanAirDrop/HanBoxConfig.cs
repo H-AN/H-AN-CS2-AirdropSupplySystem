@@ -45,6 +45,9 @@ public class HanBoxCFG
         [JsonPropertyName("glowcolor")] //发光颜色设置 ARGB
         public required string GlowColor { get; set; }
 
+        [JsonPropertyName("modelphysics")] //发光颜色设置 ARGB
+        public bool ModelPhysics { get; set; }
+
     }
 
     [JsonPropertyName("BoxList")]
@@ -95,7 +98,8 @@ public class HanBoxCFG
                     Code = 1,
                     Flags = "",
                     OpenGlow = true,
-                    GlowColor = "255,255,0,0"
+                    GlowColor = "255,255,0,0",
+                    ModelPhysics = true
 
                 },
                 new Box
@@ -112,7 +116,8 @@ public class HanBoxCFG
                     Code = 2,
                     Flags = "",
                     OpenGlow = true,
-                    GlowColor = "255,255,0,0"
+                    GlowColor = "255,255,0,0",
+                    ModelPhysics = true
                 }
             }
         };
