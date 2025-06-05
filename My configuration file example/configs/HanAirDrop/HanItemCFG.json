@@ -1,0 +1,108 @@
+{
+  "ItemList": [
+    {
+      "name": "星见雅AWP",
+      "command": "css_2jGtRfON9msoSaZE",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "MeiKoM4",
+      "command": "css_PUk2q1zMqZiEvzuy",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.3,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "回血针",
+      "command": "css_e6nJfcPjuJmVHZYi",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "MK9",
+      "command": "css_N8xxMfWowfRhimFs",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "星之XM1014",
+      "command": "css_VEqUA1RQxzVU3lyS",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "星之MP5",
+      "command": "css_I4cYtxDHdZ2TIjcW",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "AsoulScar",
+      "command": "css_yoZqMVrztRHXPGHJ",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "旋风AK",
+      "command": "css_SJepy7QDdfTBXPwD",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "金红双蝎",
+      "command": "css_UoIaXpOGktWMSioe",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "无敌30秒",
+      "command": "css_nlnPWmzlee4tsyUh",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "无限子弹30秒",
+      "command": "css_DpI5i9vNAd27FODC",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "攻速1.5倍30秒",
+      "command": "css_L050q90FvuBRDvcu",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    },
+    {
+      "name": "血量提升100",
+      "command": "css_U3STChAJgjMJnK1v",
+      "picksound": "exg.csol2.get_box",
+      "itemprobability": 0.5,
+      "enable": true,
+      "permissions": ""
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "AirDropEnble": true,
+  "AirDropMode": 0,
+  "AirDropPosMode": 0,
+  "DeathDropPercent": 0.1,
+  "AirDropTimer": 60,
+  "AirDropKillTimer": 20,
+  "AirDropName": "普通空投箱,特殊空投箱,状态空投箱,测试箱子,测试箱子1",
+  "PlayerPickEachRound": 0,
+  "AirDropSpawnMode": 0,
+  "AirDropCount": 3,
+  "AirDropDynamicCount": 1,
+  "AirDropPlayerCount": 1,
+  "PrecacheSoundEvent": "soundevents/exg_csol.vsndevts,soundevents/exg/csol2.vsndevts",
+  "AdminCommand": "css_createbox",
+  "Openrandomspawn": 1,
+  "AdminCommandFlags": "@css/vip,@css/boss,@css/other",
+  "AdminSelectBoxCommand": "css_selectbox",
+  "AdminSelectBoxCommandFlags": "@css/vip,@css/svip,@css/other",
+  "AdminSelectBoxCount": 10,
+  "AdminSelectBoxColdCown": 5.0
+}
