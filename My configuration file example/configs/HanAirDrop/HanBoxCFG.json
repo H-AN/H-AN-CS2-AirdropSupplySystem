@@ -13,8 +13,8 @@
       "enable": true,
       "code": 1,
       "flags": "",
-	    "openglow": true,
-	    "glowcolor": "255,255,0,0",
+      "openglow": true,
+      "glowcolor": "255,255,0,0",
       "modelphysics": true
     },
     {
@@ -30,8 +30,8 @@
       "enable": true,
       "code": 2,
       "flags": "",
-	    "openglow": true,
-	    "glowcolor": "255,0,255,0",
+      "openglow": true,
+      "glowcolor": "255,0,255,0",
       "modelphysics": true
     },
     {
@@ -47,8 +47,8 @@
       "enable": true,
       "code": 3,
       "flags": "",
-	    "openglow": true,
-	    "glowcolor": "255,0,0,255",
+      "openglow": true,
+      "glowcolor": "255,0,0,255",
       "modelphysics": true
     },
     {
@@ -64,8 +64,8 @@
       "enable": true,
       "code": 3,
       "flags": "",
-	    "openglow": true,
-	    "glowcolor": "255,0,0,255",
+      "openglow": true,
+      "glowcolor": "255,0,0,255",
       "modelphysics": false
     },
     {
@@ -81,8 +81,8 @@
       "enable": true,
       "code": 3,
       "flags": "",
-	    "openglow": true,
-	    "glowcolor": "255,0,0,255",
+      "openglow": true,
+      "glowcolor": "255,0,0,255",
       "modelphysics": false
     }
   ]
