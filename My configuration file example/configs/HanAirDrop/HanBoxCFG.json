@@ -59,7 +59,7 @@
       "probability": 0.5,
       "enable": true,
       "code": 4,
-      "flags": "",
+      "flags": "@css/vip,@css/boss,@css/other",
       "openglow": true,
       "glowcolor": "255,0,0,255",
       "modelphysics": false
