@@ -6,7 +6,7 @@
       "picksound": "exg.csol2.get_box",
       "itemprobability": 0.5,
       "enable": true,
-      "permissions": ""
+      "permissions": "@css/vip,@css/boss,@css/other"
     },
     {
       "name": "MeiKoM4",
