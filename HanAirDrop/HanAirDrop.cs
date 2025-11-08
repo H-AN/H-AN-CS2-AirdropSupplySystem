@@ -28,7 +28,7 @@ public class HanAirDropPlugin : BasePlugin
 
     private readonly Dictionary<ulong, DateTime> AdminCreateBoxCooldown = new();
 
-    public string physicsBox = "models/de_overpass/junk/cardboard_box/cardboard_box_4.vmdl_c";
+    public string physicsBox = "models/de_inferno/inferno_winebar_interior_01/inferno_winebar_crate_01_a.vmdl"; //models/de_overpass/junk/cardboard_box/cardboard_box_4.vmdl_c
 
 
 
@@ -774,21 +774,26 @@ public class HanAirDropPlugin : BasePlugin
         return HookResult.Continue;
     }
 
-    CTriggerMultiple CreateTrigger(CBaseProp pack)
+    public static CTriggerMultiple CreateTrigger(CBaseEntity parent)
     {
         var trigger = Utilities.CreateEntityByName<CTriggerMultiple>("trigger_multiple")!;
 
-        trigger.Entity!.Name = pack.Entity!.Name + "_trigger";
+        if (trigger == null)
+        {
+            throw new Exception($"Trigger entity \"{parent.Entity!.Name}\" could not be created!");
+        }
+
+        trigger.Entity!.Name = parent.Entity!.Name + "_trigger";
         trigger.Spawnflags = 1;
         trigger.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= ~(uint)(1 << 2);
         trigger.Collision.SolidType = SolidType_t.SOLID_VPHYSICS;
         trigger.Collision.SolidFlags = 0;
         trigger.Collision.CollisionGroup = 14;
 
-        trigger.SetModel(pack.CBodyComponent!.SceneNode!.GetSkeletonInstance().ModelState.ModelName);
         trigger.DispatchSpawn();
-        trigger.Teleport(pack.AbsOrigin, pack.AbsRotation);
-        trigger.AcceptInput("FollowEntity", pack, trigger, "!activator");
+        trigger.SetModel(parent.CBodyComponent!.SceneNode!.GetSkeletonInstance().ModelState.ModelName);
+        trigger.Teleport(parent.AbsOrigin, parent.AbsRotation);
+        trigger.AcceptInput("SetParent", parent, trigger, "!activator");
         trigger.AcceptInput("Enable");
 
         return trigger;
