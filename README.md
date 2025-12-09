@@ -1,6 +1,8 @@
 # [华仔]CS2空投补给系统 Airdrop Supply System
 创建空投补给，多配置适用于任何模式，通过命令结合空投系统 给予玩家道具状态等任何东西. 
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
+
 https://www.youtube.com/watch?v=yVuhYGvRtDA
 
 https://www.bilibili.com/video/BV1wJZ6YvENd
